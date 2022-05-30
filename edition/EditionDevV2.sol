@@ -200,7 +200,7 @@ contract EditionDevV2 is
      */
     function initToken(
         InitVoucher calldata initVoucher
-    ) external returns (uint256) {
+    ) external onlyEOA returns (uint256) {
         require(_verifyInitVoucher(initVoucher) == VOUCHER_CREATOR, "Unknown voucher signer.");
         
         _initToken(
