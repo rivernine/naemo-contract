@@ -63,7 +63,7 @@ contract $CONTRACT_NAME is
     address public royaltyRecipient = $ROYALTY_RECIPIENT;
 
     // Basis point of royalty. 
-    // e.g. 100->0.1%
+    // e.g. 100->1%
     uint96 public royaltyFeeBasisPoint = $ROYALTY_FEE_BASIS_POINT;
 
     modifier onlyNaemo() {
@@ -156,7 +156,7 @@ contract $CONTRACT_NAME is
     /**
      * @dev Update the royalty information of this collection.
      * @param royaltyRecipient_ Royalty recipient wallet.
-     * @param royaltyFeeBasisPoint_ Basis point of royalty. e.g. 100->0.1%
+     * @param royaltyFeeBasisPoint_ Basis point of royalty. e.g. 100->1%
      */
     function setTokenRoyalty(
         address royaltyRecipient_,

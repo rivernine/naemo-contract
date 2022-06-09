@@ -63,7 +63,7 @@ contract GenerativeTest is
     address public royaltyRecipient = 0x2befD7D81039ba98b90c719A28E3e80Fe2Cf900E;
 
     // Basis point of royalty.
-    // e.g. 100->0.1%
+    // e.g. 100->1%
     uint96 public royaltyFeeBasisPoint = 500;
 
     modifier onlyNaemo() {
@@ -156,7 +156,7 @@ contract GenerativeTest is
     /**
      * @dev Update the royalty information of this collection.
      * @param royaltyRecipient_ Royalty recipient wallet.
-     * @param royaltyFeeBasisPoint_ Basis point of royalty. e.g. 100->0.1%
+     * @param royaltyFeeBasisPoint_ Basis point of royalty. e.g. 100->1%
      */
     function setTokenRoyalty(
         address royaltyRecipient_,
