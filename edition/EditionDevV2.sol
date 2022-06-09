@@ -160,7 +160,7 @@ contract EditionDevV2 is
      * @dev Update the royalty information of the token.
      * @param tokenId Token ID to change royalty.
      * @param royaltyRecipient Royalty recipient wallet.
-     * @param royaltyFeeBasisPoint Basis point of royalty. e.g. 100->0.1%
+     * @param royaltyFeeBasisPoint Basis point of royalty. e.g. 100->1%
      */
     function setTokenRoyalty(
         uint256 tokenId,
