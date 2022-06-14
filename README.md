@@ -2,6 +2,11 @@
 
 ## Generative Art Contract
 Generative art contract is created through creator's input values and templates.
+### Alpha version
+The alpha version is minted by the buyer using a meta mask.
+
+### Beta version
+The beta version can only mint NAEMO.
 
 ## Edition Contract
 Edition contract is a shared contract. 
@@ -19,3 +24,10 @@ Minting scenario (beta version)
 - Max supply is minted at init token.
 1. Creator mints max supply amount of token by calling `mint(TokenInfo)`.
 2. All tokens are sent to NAEMO address.
+
+## Unique Contract
+Unique contract is a shred contract.
+
+Minting scenario (alpha version)
+1. The buyer uses a meta mask to mint.
+2. Immediately after minting, the token is sent to NAEMO's wallet address.
