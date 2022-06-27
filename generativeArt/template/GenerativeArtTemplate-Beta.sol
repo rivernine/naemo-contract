@@ -56,6 +56,13 @@ contract $CONTRACT_NAME is
         _;
     }
 
+    event SetBaseURI(string indexed _baseURI);
+    
+    event SetTokenRoyalty(
+        address indexed _royaltyRecipient, 
+        uint96 indexed _royaltyFeeBasisPoint
+    )
+
     constructor() ERC721($NAME, $SYMBOL) {
         _setDefaultRoyalty(royaltyRecipient, royaltyFeeBasisPoint);
     }
@@ -106,6 +113,7 @@ contract $CONTRACT_NAME is
      */
     function setBaseURI(string memory baseURI_) public onlyOwner {
         baseURI = baseURI_;
+        emit SetBaseURI(baseURI);
     }
 
     /**
@@ -120,6 +128,7 @@ contract $CONTRACT_NAME is
         royaltyRecipient = royaltyRecipient_;
         royaltyFeeBasisPoint = royaltyFeeBasisPoint_;
         _setDefaultRoyalty(royaltyRecipient_, royaltyFeeBasisPoint_);
+        emit SetTokenRoyalty(royaltyRecipient, royaltyFeeBasisPoint);
     }
 
     /**
@@ -134,7 +143,7 @@ contract $CONTRACT_NAME is
         require(totalSupply() + 1 <= maxSupply, "Supply has been exceeded.");
         require(!burned(tokenId), "Token number already burned.");
 
-        _safeMint(_msgSender(), tokenId);
+        _mint(_msgSender(), tokenId);
         _setTokenURI(tokenId, tokenURI);
         _currentIndex += 1;
     }

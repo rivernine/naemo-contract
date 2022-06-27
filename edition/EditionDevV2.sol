@@ -92,6 +92,22 @@ contract EditionDevV2 is
         _;
     }
 
+    event SetPrice(
+        uint256 indexed _tokenId, 
+        uint256 indexed _price
+    );
+
+    event FlipSale(
+        uint256 indexed _tokenId,
+        bool indexed _sale
+    );
+
+    event SetTokenRoyalty(
+        uint256 indexed _tokenId, 
+        address indexed _royaltyRecipient, 
+        uint96 indexed _royaltyFeeBasisPoint
+    );    
+
     constructor() ERC1155("") SignatureVerifierDevV2() {}
 
     /**
@@ -143,6 +159,7 @@ contract EditionDevV2 is
         uint256 price_
     ) external tokenExists(tokenId) onlyCreator(tokenId) {
         price[tokenId] = price_;
+        emit SetPrice(tokenId, price[tokenId]);
     }
     
     /** 
@@ -154,6 +171,7 @@ contract EditionDevV2 is
         uint256 tokenId
     ) external tokenExists(tokenId) onlyCreator(tokenId) {
         sale[tokenId] = !sale[tokenId];
+        emit FlipSale(tokenId, sale[tokenId]);
     }
 
     /**
@@ -168,6 +186,7 @@ contract EditionDevV2 is
         uint96 royaltyFeeBasisPoint
     ) external tokenExists(tokenId) onlyCreator(tokenId) {
         _setTokenRoyalty(tokenId, royaltyRecipient, royaltyFeeBasisPoint);
+        emit SetTokenRoyalty(tokenId, royaltyRecipient, royaltyFeeBasisPoint);
     }
 
     /**
@@ -257,9 +276,9 @@ contract EditionDevV2 is
         require(totalSupply(redeemVoucher.tokenId) + amount <= maxSupply[redeemVoucher.tokenId], "Supply has been exceeded.");
         require(msg.value >= price[redeemVoucher.tokenId] * amount, "Ether Amount Denied");
 
-        _mint(_msgSender(), redeemVoucher.tokenId, amount, new bytes(0));
         nonce[redeemVoucher.tokenId][redeemVoucher.nonce] = true;
         payable(NAEMO).transfer(msg.value);
+        _mint(_msgSender(), redeemVoucher.tokenId, amount, new bytes(0));
     }
 
     /**

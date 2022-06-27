@@ -32,6 +32,12 @@ contract UniqueBetaDev is ERC721URIStorage, ERC2981 {
     // Mapping from token ID to craetor address.
     mapping(uint256 => address) public creator;
 
+    event SetTokenRoyalty(
+        uint256 indexed _tokenId, 
+        address indexed _royaltyRecipient, 
+        uint96 indexed _royaltyFeeBasisPoint
+    );  
+
     constructor() ERC721("UniqueBetaDev", "UBD") {}
 
     /**
@@ -58,6 +64,7 @@ contract UniqueBetaDev is ERC721URIStorage, ERC2981 {
         require(_exists(tokenId), "Token does not exist.");
         require(_msgSender() == creator[tokenId], "Caller is not a creator.");
         _setTokenRoyalty(tokenId, royaltyRecipient, royaltyFeeBasisPoint);
+        emit SetTokenRoyalty(tokenId, royaltyRecipient, royaltyFeeBasisPoint);
     }
 
     /**
@@ -73,7 +80,7 @@ contract UniqueBetaDev is ERC721URIStorage, ERC2981 {
         require(_msgSender() == tx.origin, "Caller cannot be a contract.");
         
         creator[tokenInfo.tokenId] = _msgSender();
-        _safeMint(_msgSender(), tokenInfo.tokenId);
+        _mint(_msgSender(), tokenInfo.tokenId);
         _setTokenURI(tokenInfo.tokenId, tokenInfo.tokenURI);
         _setTokenRoyalty(
             tokenInfo.tokenId, 

@@ -76,6 +76,17 @@ contract GenerativeTest is
         _;
     }
 
+    event SetPrice(uint256 indexed _price);
+
+    event SetBaseURI(string indexed _baseURI);
+
+    event FlipSale(bool indexed _sale);
+
+    event SetTokenRoyalty(
+        address indexed _royaltyRecipient, 
+        uint96 indexed _royaltyFeeBasisPoint
+    );
+
     constructor() ERC721("GenerativeTest", "GT") EIP712("GenerativeTest", "1") {
         _setDefaultRoyalty(royaltyRecipient, royaltyFeeBasisPoint);
     }
@@ -136,6 +147,7 @@ contract GenerativeTest is
      */
     function setPrice(uint256 price_) public onlyOwner {
         price = price_;
+        emit SetPrice(price);
     }
 
     /**
@@ -144,6 +156,7 @@ contract GenerativeTest is
      */
     function setBaseURI(string memory baseURI_) public onlyOwner {
         baseURI = baseURI_;
+        emit SetBaseURI(baseURI);
     }
 
     /**
@@ -151,6 +164,7 @@ contract GenerativeTest is
      */
     function flipSale() external onlyOwner {
         sale = !sale;
+        emit FlipSale(sale);
     }
 
     /**
@@ -165,6 +179,7 @@ contract GenerativeTest is
         royaltyRecipient = royaltyRecipient_;
         royaltyFeeBasisPoint = royaltyFeeBasisPoint_;
         _setDefaultRoyalty(royaltyRecipient_, royaltyFeeBasisPoint_);
+        emit SetTokenRoyalty(royaltyRecipient, royaltyFeeBasisPoint);
     }
 
     /**
@@ -181,9 +196,9 @@ contract GenerativeTest is
         require(totalSupply() + 1 <= maxSupply, "Supply has been exceeded.");
         require(!burned(voucher.tokenId), "Token number already burned.");
 
-        _safeMint(_msgSender(), voucher.tokenId);
-        _setTokenURI(voucher.tokenId, voucher.tokenURI);
         _currentIndex += 1;
+        _mint(_msgSender(), voucher.tokenId);
+        _setTokenURI(voucher.tokenId, voucher.tokenURI);
     }
 
     /**
@@ -200,9 +215,9 @@ contract GenerativeTest is
         require(!burned(voucher.tokenId), "Token number already burned.");
         require(msg.value >= price, "Ether Amount Denied");
 
-        _safeMint(_msgSender(), voucher.tokenId);
-        _setTokenURI(voucher.tokenId, voucher.tokenURI);
         _currentIndex += 1;
+        _mint(_msgSender(), voucher.tokenId);
+        _setTokenURI(voucher.tokenId, voucher.tokenURI);
     }
 
     /**
