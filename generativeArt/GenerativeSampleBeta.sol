@@ -143,9 +143,9 @@ contract GenerativeSampleBeta is
         require(totalSupply() + 1 <= maxSupply, "Supply has been exceeded.");
         require(!burned(tokenId), "Token number already burned.");
 
+        _currentIndex += 1;
         _mint(_msgSender(), tokenId);
         _setTokenURI(tokenId, tokenURI);
-        _currentIndex += 1;
     }
 
 

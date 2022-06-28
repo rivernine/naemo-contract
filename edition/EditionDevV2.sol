@@ -50,7 +50,7 @@ contract EditionDevV2 is
     
     // Address with permission to mint.
     // Vouchers must sign with the private key of this address.
-    address public VOUCHER_CREATOR = 0x75a23e5b8F814aA3cAb4bCcBaa68D1Ad08e9525b;
+    address public VOUCHER_CREATOR = 0xd8f585d47f9dD7262c91b7bB1eFfDf4E42f3F598;
 
     // Mapping from token ID to craetor address.
     mapping(uint256 => address) public creator;
