@@ -57,11 +57,11 @@ contract GenerativeSampleBeta is
     }
 
     event SetBaseURI(string indexed _baseURI);
-    
+
     event SetTokenRoyalty(
         address indexed _royaltyRecipient, 
         uint96 indexed _royaltyFeeBasisPoint
-    )
+    );
 
     constructor() ERC721("Generative sample beta", "GSB") {
         _setDefaultRoyalty(royaltyRecipient, royaltyFeeBasisPoint);

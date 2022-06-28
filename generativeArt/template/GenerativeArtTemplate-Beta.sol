@@ -61,7 +61,7 @@ contract $CONTRACT_NAME is
     event SetTokenRoyalty(
         address indexed _royaltyRecipient, 
         uint96 indexed _royaltyFeeBasisPoint
-    )
+    );
 
     constructor() ERC721($NAME, $SYMBOL) {
         _setDefaultRoyalty(royaltyRecipient, royaltyFeeBasisPoint);
