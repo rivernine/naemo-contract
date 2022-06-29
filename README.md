@@ -1,8 +1,18 @@
 # naemo-contract
 
+## MODIFIED 2022-06-29
+### 271-03. External Call Between Token Minting And Transfer
+1. `UniqueBetaDev.sol`
+`_safeMint()` was replaced by `_mint()`.
+
+2. `EditionDevV2.sol`
+Because `mint()` function is only callable by an EOA, `to` parameter of `_mint()` cannot be a CA. 
+And external call of `_mint()` function is only called when `to` parameter is a CA. (check `if (to.isContract())` under `_doSafeTransferAcceptanceCheck()`.) 
+Therefore, as far as I know, the external call can never be called within `mint()` function, which seems to solve the problem. Is it right?
+
 ## MODIFIED 2022-06-27
 ### 271-01. Check Effect Interaction Pattern Violated
-1. `EditionDevV2` on line 281
+1. `EditionDevV2.sol` on line 281
 - before
 ```js
 _mint(_msgSender(), redeemVoucher.tokenId, amount, new bytes(0));
@@ -17,7 +27,7 @@ payable(NAEMO).transfer(msg.value);
 _mint(_msgSender(), redeemVoucher.tokenId, amount, new bytes(0));
 ```
 
-2. `GenerativeSampleBeta` on line 146
+2. `GenerativeSampleBeta.sol` on line 146
 - before
 ```js
 _safeMint(_msgSender(), tokenId);
@@ -28,7 +38,7 @@ _safeMint(_msgSender(), tokenId);
 _mint(_msgSender(), tokenId);
 ```
 
-3. `GenerativeTest` on line 200, 219
+3. `GenerativeTest.sol` on line 200, 219
 - before
 ```js
 _safeMint(_msgSender(), voucher.tokenId);
