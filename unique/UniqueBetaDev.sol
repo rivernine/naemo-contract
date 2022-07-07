@@ -22,6 +22,7 @@ contract UniqueBetaDev is ERC721URIStorage, ERC2981 {
     struct TokenInfo {
         uint256 tokenId;
         string tokenURI;
+        address creator;
         address royaltyRecipient;
         uint96 royaltyFeeBasisPoint;
     }
@@ -79,7 +80,7 @@ contract UniqueBetaDev is ERC721URIStorage, ERC2981 {
     ) external {
         require(_msgSender() == tx.origin, "Caller cannot be a contract.");
         
-        creator[tokenInfo.tokenId] = _msgSender();
+        creator[tokenInfo.tokenId] = tokenInfo.creator;
         _mint(_msgSender(), tokenInfo.tokenId);
         _setTokenURI(tokenInfo.tokenId, tokenInfo.tokenURI);
         _setTokenRoyalty(
