@@ -18,7 +18,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 
-contract GenerativeSampleBeta is
+contract GenerativeArtBeta is
     ERC721URIStorage,
     ERC2981,
     Ownable
@@ -58,12 +58,7 @@ contract GenerativeSampleBeta is
 
     event SetBaseURI(string indexed _baseURI);
 
-    event SetTokenRoyalty(
-        address indexed _royaltyRecipient, 
-        uint96 indexed _royaltyFeeBasisPoint
-    );
-
-    constructor() ERC721("Generative sample beta", "GSB") {
+    constructor() ERC721("Generative Art Beta", "GAB") {
         _setDefaultRoyalty(royaltyRecipient, royaltyFeeBasisPoint);
     }
 
@@ -114,21 +109,6 @@ contract GenerativeSampleBeta is
     function setBaseURI(string memory baseURI_) public onlyOwner {
         baseURI = baseURI_;
         emit SetBaseURI(baseURI);
-    }
-
-    /**
-     * @dev Update the royalty information of this collection.
-     * @param royaltyRecipient_ Royalty recipient wallet.
-     * @param royaltyFeeBasisPoint_ Basis point of royalty. e.g. 100->1%
-     */
-    function setTokenRoyalty(
-        address royaltyRecipient_,
-        uint96 royaltyFeeBasisPoint_
-    ) external onlyOwner {
-        royaltyRecipient = royaltyRecipient_;
-        royaltyFeeBasisPoint = royaltyFeeBasisPoint_;
-        _setDefaultRoyalty(royaltyRecipient_, royaltyFeeBasisPoint_);
-        emit SetTokenRoyalty(royaltyRecipient, royaltyFeeBasisPoint);
     }
 
     /**

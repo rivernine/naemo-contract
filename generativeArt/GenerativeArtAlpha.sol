@@ -20,7 +20,7 @@ import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
 
-contract GenerativeTest is
+contract GenerativeArtAlpha is
     ERC721URIStorage,
     ERC2981,
     EIP712,
@@ -33,11 +33,15 @@ contract GenerativeTest is
     }
 
     // NAEMO wallet.
-    address public NAEMO = 0x6A5C5f7964d0cA5a313Bd237ecA6657F52F17810;
+    address public NAEMO = 0x52e827F1d72716a0dc2485550C80912eE8Ec1972;
+
+    // Basis point of NAEMO service costs.
+    // e.g. 100->1%
+    uint256 public NAEMO_FEE_BASIS_POINT = 1000;
 
     // Address with permission to mint.
     // Vouchers must sign with the private key of this address.
-    address public VOUCHER_CREATOR = 0x75a23e5b8F814aA3cAb4bCcBaa68D1Ad08e9525b;
+    address public VOUCHER_CREATOR = 0x08C25De9BC1C552c4c783F79BfD5B980737e9744;
 
     uint256 private _currentIndex = 0;
 
@@ -50,7 +54,7 @@ contract GenerativeTest is
 
     // Mint price.
     // unit: wei
-    uint256 public price = 1000000000000000;
+    uint256 public price = 100000000000000000;
 
     // Base URI of metadata.
     string public baseURI = "ipfs://QmQbRroNMsDZuYEG3w6ZfJa8PA8EpaQdAJVMZ8MMZQFXWs/";
@@ -64,12 +68,7 @@ contract GenerativeTest is
 
     // Basis point of royalty.
     // e.g. 100->1%
-    uint96 public royaltyFeeBasisPoint = 500;
-
-    modifier onlyNaemo() {
-        require(_msgSender() == NAEMO, "Caller is not a NAEMO.");
-        _;
-    }
+    uint96 public royaltyFeeBasisPoint = 300;
 
     modifier onlyEOA() {
         require(_msgSender() == tx.origin, "Caller cannot be a contract.");
@@ -82,12 +81,9 @@ contract GenerativeTest is
 
     event FlipSale(bool indexed _sale);
 
-    event SetTokenRoyalty(
-        address indexed _royaltyRecipient, 
-        uint96 indexed _royaltyFeeBasisPoint
-    );
+    event Withdraw();
 
-    constructor() ERC721("GenerativeTest", "GT") EIP712("GenerativeTest", "1") {
+    constructor() ERC721("Generative Art Alpha", "GAA") EIP712("Generative Art Alpha", "1") {
         _setDefaultRoyalty(royaltyRecipient, royaltyFeeBasisPoint);
     }
 
@@ -126,7 +122,8 @@ contract GenerativeTest is
      * @dev Update naemo address.
      * @param naemo NAEMO wallet address.
      */
-    function setNaemo(address naemo) external onlyNaemo {
+    function setNaemo(address naemo) external {
+        require(_msgSender() == NAEMO, "Caller is not a NAEMO.");
         require(naemo != address(0), "The NAEMO cannot be null address.");
         NAEMO = naemo;
     }
@@ -168,21 +165,6 @@ contract GenerativeTest is
     }
 
     /**
-     * @dev Update the royalty information of this collection.
-     * @param royaltyRecipient_ Royalty recipient wallet.
-     * @param royaltyFeeBasisPoint_ Basis point of royalty. e.g. 100->1%
-     */
-    function setTokenRoyalty(
-        address royaltyRecipient_,
-        uint96 royaltyFeeBasisPoint_
-    ) external onlyOwner {
-        royaltyRecipient = royaltyRecipient_;
-        royaltyFeeBasisPoint = royaltyFeeBasisPoint_;
-        _setDefaultRoyalty(royaltyRecipient_, royaltyFeeBasisPoint_);
-        emit SetTokenRoyalty(royaltyRecipient, royaltyFeeBasisPoint);
-    }
-
-    /**
      * @dev Mint NFT by redeeming a voucher.
      *
      * Each voucher has token ID and token URI info.
@@ -215,16 +197,20 @@ contract GenerativeTest is
         require(!burned(voucher.tokenId), "Token number already burned.");
         require(msg.value >= price, "Ether Amount Denied");
 
+        payable(NAEMO).transfer(
+            (msg.value * NAEMO_FEE_BASIS_POINT) / 10000
+        );
         _currentIndex += 1;
         _mint(_msgSender(), voucher.tokenId);
         _setTokenURI(voucher.tokenId, voucher.tokenURI);
     }
 
     /**
-     * @dev Send balance of contract to address referenced in {NAEMO}.
+     * @dev Send balance of contract to owner address.
      */
-    function withdraw() external onlyNaemo {
-        require(payable(NAEMO).send(address(this).balance));
+    function withdraw() external onlyOwner {
+        require(payable(owner()).send(address(this).balance));
+        emit Withdraw();
     }
 
     /**
@@ -232,7 +218,7 @@ contract GenerativeTest is
      * @param tokenId Token ID to burn.
      */
     function burn(uint256 tokenId) public {
-        require(_isApprovedOrOwner(_msgSender(), tokenId), "Caller is not owner nor approved");
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "Caller is not the token owner nor approved");
         _burned[tokenId] = true;
         _burn(tokenId);
     }

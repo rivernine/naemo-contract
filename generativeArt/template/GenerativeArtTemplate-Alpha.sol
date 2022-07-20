@@ -35,6 +35,10 @@ contract $CONTRACT_NAME is
     // NAEMO wallet.
     address public NAEMO = $NAEMO;
 
+    // Basis point of NAEMO service costs. 
+    // e.g. 100->1%
+    uint256 public NAEMO_FEE_BASIS_POINT = 1000;
+
     // Address with permission to mint.
     // Vouchers must sign with the private key of this address.
     address public VOUCHER_CREATOR = $VOUCHER_CREATOR;
@@ -66,11 +70,6 @@ contract $CONTRACT_NAME is
     // e.g. 100->1%
     uint96 public royaltyFeeBasisPoint = $ROYALTY_FEE_BASIS_POINT;
 
-    modifier onlyNaemo() {
-        require(_msgSender() == NAEMO, "Caller is not a NAEMO.");
-        _;
-    }
-
     modifier onlyEOA() {
         require(_msgSender() == tx.origin, "Caller cannot be a contract.");
         _;
@@ -82,10 +81,7 @@ contract $CONTRACT_NAME is
 
     event FlipSale(bool indexed _sale);
 
-    event SetTokenRoyalty(
-        address indexed _royaltyRecipient, 
-        uint96 indexed _royaltyFeeBasisPoint
-    );
+    event Withdraw();
 
     constructor() ERC721($NAME, $SYMBOL) EIP712($NAME, "1") {
         _setDefaultRoyalty(royaltyRecipient, royaltyFeeBasisPoint);
@@ -126,7 +122,8 @@ contract $CONTRACT_NAME is
      * @dev Update naemo address.
      * @param naemo NAEMO wallet address.
      */
-    function setNaemo(address naemo) external onlyNaemo {
+    function setNaemo(address naemo) external {
+        require(_msgSender() == NAEMO, "Caller is not a NAEMO.");
         require(naemo != address(0), "The NAEMO cannot be null address.");
         NAEMO = naemo;
     }
@@ -168,21 +165,6 @@ contract $CONTRACT_NAME is
     }
 
     /**
-     * @dev Update the royalty information of this collection.
-     * @param royaltyRecipient_ Royalty recipient wallet.
-     * @param royaltyFeeBasisPoint_ Basis point of royalty. e.g. 100->1%
-     */
-    function setTokenRoyalty(
-        address royaltyRecipient_,
-        uint96 royaltyFeeBasisPoint_
-    ) external onlyOwner {
-        royaltyRecipient = royaltyRecipient_;
-        royaltyFeeBasisPoint = royaltyFeeBasisPoint_;
-        _setDefaultRoyalty(royaltyRecipient_, royaltyFeeBasisPoint_);
-        emit SetTokenRoyalty(royaltyRecipient, royaltyFeeBasisPoint);
-    }
-
-    /**
      * @dev Mint NFT by redeeming a voucher.
      * 
      * Each voucher has token ID and token URI info.
@@ -215,16 +197,20 @@ contract $CONTRACT_NAME is
         require(!burned(voucher.tokenId), "Token number already burned.");
         require(msg.value >= price, "Ether Amount Denied");
 
+        payable(NAEMO).transfer(
+            (msg.value * NAEMO_FEE_BASIS_POINT) / 10000
+        );
         _currentIndex += 1;
         _mint(_msgSender(), voucher.tokenId);
         _setTokenURI(voucher.tokenId, voucher.tokenURI);
     }
 
     /**
-     * @dev Send balance of contract to address referenced in {NAEMO}.
+     * @dev Send balance of contract to owner address.
      */
-    function withdraw() external onlyNaemo {
-        require(payable(NAEMO).send(address(this).balance));
+    function withdraw() external onlyOwner {
+        require(payable(owner()).send(address(this).balance));
+        emit Withdraw();
     }
 
     /**
@@ -232,7 +218,7 @@ contract $CONTRACT_NAME is
      * @param tokenId Token ID to burn.
      */
     function burn(uint256 tokenId) public {
-        require(_isApprovedOrOwner(_msgSender(), tokenId), "Caller is not owner nor approved");
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "Caller is not the token owner nor approved");
         _burned[tokenId] = true;
         _burn(tokenId);
     }

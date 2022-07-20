@@ -17,7 +17,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 
-contract UniqueBetaDev is ERC721URIStorage, ERC2981 {
+contract NaemoSharedUnique is ERC721URIStorage, ERC2981 {
     
     struct TokenInfo {
         uint256 tokenId;
@@ -33,13 +33,7 @@ contract UniqueBetaDev is ERC721URIStorage, ERC2981 {
     // Mapping from token ID to craetor address.
     mapping(uint256 => address) public creator;
 
-    event SetTokenRoyalty(
-        uint256 indexed _tokenId, 
-        address indexed _royaltyRecipient, 
-        uint96 indexed _royaltyFeeBasisPoint
-    );  
-
-    constructor() ERC721("UniqueBetaDev", "UBD") {}
+    constructor() ERC721("NAEMO Shared Unique", "NAEMOUNIQUE") {}
 
     /**
      * @dev Update naemo address.
@@ -49,23 +43,6 @@ contract UniqueBetaDev is ERC721URIStorage, ERC2981 {
         require(_msgSender() == NAEMO, "Caller is not a NAEMO.");
         require(naemo != address(0), "The NAEMO cannot be null address.");
         NAEMO = naemo;
-    }
-
-    /**
-     * @dev Update the royalty information of the token.
-     * @param tokenId Token ID to change royalty.
-     * @param royaltyRecipient Royalty recipient wallet.
-     * @param royaltyFeeBasisPoint Basis point of royalty. e.g. 100->1%
-     */
-    function setTokenRoyalty(
-        uint256 tokenId,
-        address royaltyRecipient,
-        uint96 royaltyFeeBasisPoint
-    ) external {        
-        require(_exists(tokenId), "Token does not exist.");
-        require(_msgSender() == creator[tokenId], "Caller is not a creator.");
-        _setTokenRoyalty(tokenId, royaltyRecipient, royaltyFeeBasisPoint);
-        emit SetTokenRoyalty(tokenId, royaltyRecipient, royaltyFeeBasisPoint);
     }
 
     /**

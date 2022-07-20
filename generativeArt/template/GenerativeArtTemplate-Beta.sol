@@ -57,11 +57,6 @@ contract $CONTRACT_NAME is
     }
 
     event SetBaseURI(string indexed _baseURI);
-    
-    event SetTokenRoyalty(
-        address indexed _royaltyRecipient, 
-        uint96 indexed _royaltyFeeBasisPoint
-    );
 
     constructor() ERC721($NAME, $SYMBOL) {
         _setDefaultRoyalty(royaltyRecipient, royaltyFeeBasisPoint);
@@ -117,21 +112,6 @@ contract $CONTRACT_NAME is
     }
 
     /**
-     * @dev Update the royalty information of this collection.
-     * @param royaltyRecipient_ Royalty recipient wallet.
-     * @param royaltyFeeBasisPoint_ Basis point of royalty. e.g. 100->1%
-     */
-    function setTokenRoyalty(
-        address royaltyRecipient_,
-        uint96 royaltyFeeBasisPoint_
-    ) external onlyOwner {
-        royaltyRecipient = royaltyRecipient_;
-        royaltyFeeBasisPoint = royaltyFeeBasisPoint_;
-        _setDefaultRoyalty(royaltyRecipient_, royaltyFeeBasisPoint_);
-        emit SetTokenRoyalty(royaltyRecipient, royaltyFeeBasisPoint);
-    }
-
-    /**
      * @dev Mint NFT.
      * @param tokenId Token ID to mint.
      * @param tokenURI URI of token.
@@ -154,7 +134,7 @@ contract $CONTRACT_NAME is
      * @param tokenId Token ID to burn.
      */
     function burn(uint256 tokenId) public {
-        require(_isApprovedOrOwner(_msgSender(), tokenId), "Caller is not owner nor approved");
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "Caller is not the token owner nor approved");
         _burned[tokenId] = true;
         _burn(tokenId);
     }

@@ -18,14 +18,14 @@ import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Burnable.sol";
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
-import "./SignatureVerifierDevV2.sol";
+import "./NaemoSignatureVerifier.sol";
 
-contract EditionDevV2 is
+contract NaemoSharedEdition is
     ERC1155Burnable,
     ERC1155Supply,
     ERC1155URIStorage,
     ERC2981,
-    SignatureVerifierDevV2
+    NaemoSignatureVerifier
 {
     struct TokenInfo {
         uint256 tokenId;
@@ -37,20 +37,24 @@ contract EditionDevV2 is
     }
 
     // Token name
-    string public name = "NAEMO Edition";
+    string public name = "NAEMO Shared Edition";
 
     // Token symbol
-    string public symbol = "NME";
+    string public symbol = "NAEMOEDITION";
 
     // NAEMO wallet.
-    address public NAEMO = 0x6A5C5f7964d0cA5a313Bd237ecA6657F52F17810;
+    address public NAEMO = 0x52e827F1d72716a0dc2485550C80912eE8Ec1972;
 
     // NAEMO's NFT wallet.
-    address public NAEMO_NFT = 0x6A5C5f7964d0cA5a313Bd237ecA6657F52F17810;
+    address public NAEMO_NFT = 0x52e827F1d72716a0dc2485550C80912eE8Ec1972;
+
+    // Basis point of NAEMO service costs. 
+    // e.g. 100->1%
+    uint256 public NAEMO_FEE_BASIS_POINT = 1000;
     
     // Address with permission to mint.
     // Vouchers must sign with the private key of this address.
-    address public VOUCHER_CREATOR = 0xd8f585d47f9dD7262c91b7bB1eFfDf4E42f3F598;
+    address public VOUCHER_CREATOR = 0x08C25De9BC1C552c4c783F79BfD5B980737e9744;
 
     // Mapping from token ID to craetor address.
     mapping(uint256 => address) public creator;
@@ -102,13 +106,7 @@ contract EditionDevV2 is
         bool indexed _sale
     );
 
-    event SetTokenRoyalty(
-        uint256 indexed _tokenId, 
-        address indexed _royaltyRecipient, 
-        uint96 indexed _royaltyFeeBasisPoint
-    );    
-
-    constructor() ERC1155("") SignatureVerifierDevV2() {}
+    constructor() ERC1155("") NaemoSignatureVerifier() {}
 
     /**
      * @dev Returns the initialization state of the token.
@@ -172,21 +170,6 @@ contract EditionDevV2 is
     ) external tokenExists(tokenId) onlyCreator(tokenId) {
         sale[tokenId] = !sale[tokenId];
         emit FlipSale(tokenId, sale[tokenId]);
-    }
-
-    /**
-     * @dev Update the royalty information of the token.
-     * @param tokenId Token ID to change royalty.
-     * @param royaltyRecipient Royalty recipient wallet.
-     * @param royaltyFeeBasisPoint Basis point of royalty. e.g. 100->1%
-     */
-    function setTokenRoyalty(
-        uint256 tokenId,
-        address royaltyRecipient,
-        uint96 royaltyFeeBasisPoint
-    ) external tokenExists(tokenId) onlyCreator(tokenId) {
-        _setTokenRoyalty(tokenId, royaltyRecipient, royaltyFeeBasisPoint);
-        emit SetTokenRoyalty(tokenId, royaltyRecipient, royaltyFeeBasisPoint);
     }
 
     /**
@@ -268,7 +251,7 @@ contract EditionDevV2 is
     function redeem(
         RedeemVoucher calldata redeemVoucher, 
         uint256 amount
-    ) external payable onlyEOA tokenExists(redeemVoucher.tokenId){        
+    ) external payable onlyEOA tokenExists(redeemVoucher.tokenId) {        
         require(_verifyRedeemVoucher(redeemVoucher) == VOUCHER_CREATOR, "Unknown voucher signer.");
         require(sale[redeemVoucher.tokenId], "It's not on sale.");
         require(!nonce[redeemVoucher.tokenId][redeemVoucher.nonce], "Nonce already used.");
@@ -277,7 +260,12 @@ contract EditionDevV2 is
         require(msg.value >= price[redeemVoucher.tokenId] * amount, "Ether Amount Denied");
 
         nonce[redeemVoucher.tokenId][redeemVoucher.nonce] = true;
-        payable(NAEMO).transfer(msg.value);
+        payable(NAEMO).transfer(
+            (msg.value * NAEMO_FEE_BASIS_POINT) / 10000
+        );
+        payable(creator[redeemVoucher.tokenId]).transfer(
+            (msg.value * (10000 - NAEMO_FEE_BASIS_POINT)) / 10000
+        );
         _mint(_msgSender(), redeemVoucher.tokenId, amount, new bytes(0));
     }
 

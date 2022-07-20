@@ -16,7 +16,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
 
-contract SignatureVerifierDevV2 is EIP712 {
+contract NaemoSignatureVerifier is EIP712 {
 
     struct InitVoucher {
         uint256 tokenId;        
@@ -38,7 +38,7 @@ contract SignatureVerifierDevV2 is EIP712 {
     }
 
     // Signature domain name
-    string private constant SIGNATURE_DOMAIN = "EditionDev";
+    string private constant SIGNATURE_DOMAIN = "NAEMO Shared Edition";
 
     // Signature domain version
     string private constant SIGNATURE_VERSION = "1";
